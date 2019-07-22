@@ -6,6 +6,7 @@ package io.funfun.redbook
 import kotlin.test.Test
 import kotlin.test.assertNotNull
 import io.funfun.redbook.FPList
+import kotlin.system.measureTimeMillis
 import kotlin.test.assertEquals
 
 class AppTest {
@@ -37,13 +38,55 @@ class AppTest {
         assertEquals(2, ((((resultList2 as? FPList.Cons)?.tail as? FPList.Cons)?.tail as? FPList.Cons)?.tail as? FPList.Cons)?.head)
     }
 
+    @Test fun testStreamMap() {
+        val originStream = Stream({1}, {2}, {3}, {4})
+        val resultStream = originStream.map {
+            println("@## $it")
+            it + 1
+        }
+
+        assertNotNull(resultStream)
+        assertEquals(2, resultStream.head())
+        assertEquals(3, resultStream.tail().head())
+        assertEquals(4, resultStream.tail().tail().head())
+        assertEquals(5, resultStream.tail().tail().tail().head())
+    }
+
     @Test fun testReverse() {
         val consList = FPList(1,2,3,4)
         val expectList = FPList(4,3,2,1)
         assertEquals(expectList, consList.reverse())
     }
 
-//    @Test fun testParallelSum() {
-//        assertEquals((1..100).sum(), sum((1..100).toList()))
-//    }
+    @Test fun testStreamFoldLeft() {
+        val stream = Stream({1}, {2}, {3})
+        assertEquals(6, stream.foldLeft(0) { v1, v2 ->
+            v1 + v2
+        })
+        assertEquals(-6, stream.foldLeft(0) { v1, v2 ->
+            v1 - v2
+        })
+    }
+
+    @Test fun testStreamFoldRight() {
+        val stream = Stream({1}, {2}, {3})
+        assertEquals(6, stream.foldRight(0) { v1, v2 ->
+            v1 + v2
+        })
+        assertEquals(2, stream.foldRight(0) { v1, v2 ->
+            v1 - v2
+        })
+    }
+
+    @Test fun testParallelSum() {
+        println("@## measureTimeMillis1 " + measureTimeMillis { (1..500000).toList().sum() })
+        println("@## measureTimeMillis2 " + measureTimeMillis { run(map2(lazyUnit { (1..100).toList() }, unit( listOf<Int>())) { a, b -> a + b })})
+        assertEquals(sumD((1..100).toList()), run(sumP((1..100).toList())))
+    }
+
+    @Test fun testSortPar() {
+        val target = listOf(4, 2, 5, 20, 1, 6, 11, 7, 15, 12)
+        val expect = listOf(1, 2, 4, 5, 6, 7, 11, 12, 15, 20)
+        assertEquals(expect, run(sortPar(lazyUnit { target })))
+    }
 }
