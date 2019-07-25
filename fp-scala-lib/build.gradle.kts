@@ -13,7 +13,7 @@ sourceSets {
     main {
         withConvention(ScalaSourceSet::class) {
             scala {
-                setSrcDirs(listOf("src/scala"))
+                setSrcDirs(listOf("src/main/scala"))
             }
         }
     }

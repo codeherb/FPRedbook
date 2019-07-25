@@ -6,6 +6,9 @@ package io.funfun.redbook
 object App {
 
   def main(args: Array[String]): Unit = {
-
+    val a = FPList(1,2,3,4)
+    val b = FPList.filter(a) { _ > 3 }
+    printf("a = " + a)
+    printf("b = " + b)
   }
 }

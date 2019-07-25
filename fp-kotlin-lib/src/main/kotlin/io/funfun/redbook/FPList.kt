@@ -54,3 +54,15 @@ fun <T> FPList<T>.append(other: FPList<T>): FPList<T> = when(this) {
         FPList.Cons(head, other)
     }
 }
+
+fun <T> FPList<T>.take(n: Int, acc: FPList<T> = FPList.None): FPList<T> = when(this) {
+    is FPList.None -> acc
+    is FPList.Cons -> if (n > 0) tail.take(n -1, FPList.Cons(head, acc))
+                    else acc
+}
+
+
+fun <T> FPList<T>.length(acc: Int = 0): Int = when(this) {
+    is FPList.None -> acc
+    is FPList.Cons -> tail.length(acc + 1)
+}
