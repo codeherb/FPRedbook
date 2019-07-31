@@ -1,6 +1,7 @@
 package io.funfun.redbook;
 
 import java.util.NoSuchElementException;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public abstract class Stream<T> {
@@ -38,6 +39,34 @@ public abstract class Stream<T> {
         return result;
     }
 
+    public <T> Stream<T> filter(Predicate<T> predicate) {
+        return this.filter(NONE, predicate);
+    }
+
+    protected  <T> Stream<T> filter(Stream<T> acc, Predicate<T> predicate) {
+        if (this instanceof None) {
+            return acc.reverse();
+        } else {
+            if (predicate.test(((Seq<T>)this).head())) {
+                return this.tail().filter(new Seq(() -> ((Seq<T>)this).head(), () -> acc), predicate);
+            } else {
+                return this.tail().filter(acc, predicate);
+            }
+        }
+    }
+
+    public <T> Stream<T> reverse() {
+        return reverse(NONE);
+    }
+
+    protected <T> Stream<T> reverse(Stream<T> acc) {
+        if (this instanceof None)
+            return acc;
+        else {
+            return this.tail().reverse(new Seq(() -> ((Seq<T>)this).head(), () -> acc));
+        }
+    }
+
     public static class Seq<T> extends Stream<T> {
 
         private final Supplier<T> head;
@@ -70,6 +99,11 @@ public abstract class Stream<T> {
         boolean isEmpty() {
             return false;
         }
+
+        @Override
+        public String toString() {
+            return "Seq(\"" + head() + "\", " + tail() + ")";
+        }
     }
 
     public static class None extends Stream<Object> {
@@ -87,6 +121,11 @@ public abstract class Stream<T> {
         @Override
         boolean isEmpty() {
             return true;
+        }
+
+        @Override
+        public String toString() {
+            return "None";
         }
     }
 }

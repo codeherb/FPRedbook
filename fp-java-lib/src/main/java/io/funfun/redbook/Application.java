@@ -9,5 +9,8 @@ class Application {
         System.out.println("hello? consList? " + consList);
         FPList<Integer> consList2 = FPList.fpList(1, 2, 3, 4);
         System.out.println("consList.map { + 1} " + consList2.map((Integer num) -> num + 1));
+        Stream<Integer> intStream = Stream.stream(1, 2, 3, 4, 5);
+        System.out.println("intStream.reverse " + intStream.reverse());
+        System.out.println("intStream.filter " + intStream.filter((Integer num) -> num > 3));
     }
 }
