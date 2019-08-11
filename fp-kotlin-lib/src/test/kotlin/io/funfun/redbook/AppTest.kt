@@ -92,6 +92,7 @@ class AppTest {
         val expect = listOf(1, 2, 4, 5, 6, 7, 11, 12, 15, 20)
         assertEquals(expect, run(sortPar(lazyUnit { target })))
     }
+<<<<<<< HEAD
 
     @Test fun testSafeDiv() {
         val target = safeDiv(4, 2).map { it + 1 }.orElse { Either.Left(-1) }
@@ -106,4 +107,6 @@ class AppTest {
         val target2 = Option.Some(3).map { it + 1 }.getOrElse { -1 }
         assertEquals(4, target2)
     }
+=======
+>>>>>>> d0d41507e6bcecb8def0b629dad666cc6e923644
 }

@@ -52,7 +52,7 @@ fun <T> List<T>.splitAt(index: Int): Pair<List<T>, List<T>> {
 // 코루틴을 사용하는 비동기 api
 typealias Par<A> = (suspend (CoroutineScope) -> Deferred<A>)
 
-// 즉시 평가되어 결과 a를 산출하는 계산을 생성&
+// 즉시 평가되어 결과 a를 산출하는 계산을 생성
 fun <T> unit(a: T): Par<T> = { _: CoroutineScope -> CompletableDeferred(a) }
 
 // run이 동시적으로 평가한 표현식 a를 감싼다.
