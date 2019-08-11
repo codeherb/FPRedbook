@@ -22,15 +22,18 @@ fun <E, A: B, B> Either<E, A>.orElse(b: () -> Either<E, B>): Either<E, B> = when
     is Either.Left -> b()
 }
 
-fun <E, A, B, C> Either<E, A>.map2(b: Either<E, B>, f: (A, B) -> C): Either<E, C> = when(this) {
-    is Either.Right -> {
-        when (b) {
-            is Either.Right -> Either.Right(f(value, b.value))
-            is Either.Left -> b
-        }
-    }
-    is Either.Left -> this
-}
+// 다음 동작을 일반화 하면 map2와 같이 표현 할 수 있다.
+//when(this) {
+//    is Either.Right -> {
+//        when (b) {
+//            is Either.Right -> Either.Right(f(value, b.value))
+//            is Either.Left -> b
+//        }
+//    }
+//    is Either.Left -> this
+//}
+fun <E, A, B, C> Either<E, A>.map2(b: Either<E, B>, f: (A, B) -> C): Either<E, C> =
+    this.flatMap { aa -> b.map { bb -> f(aa, bb) } }
 
 fun <A> Try(a: () -> A): Either<Exception, A> =
         try {
