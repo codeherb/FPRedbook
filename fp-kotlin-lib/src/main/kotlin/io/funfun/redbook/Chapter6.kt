@@ -78,8 +78,34 @@ object RandImpl {
                 }
             }}
 
+    fun <T:R , R> flatMap(ra: Rand<T>, f: (v: T) -> Rand<R>) : Rand<R> {
+        return {
+            val (v, rng) = ra(it)
+            f(v)(rng)
+        }
+    }
+
     fun <A, B> both(ra: Rand<A>, rb: Rand<B>): Rand<Pair<A, B>> =
             map2(ra, rb) { a, b -> Pair(a, b) }
+
+    fun <A> sequence(fs: List<Rand<A>>): Rand<List<A>> =
+            {
+                val acc = mutableListOf<A>()
+                var next = it
+                fs.forEach { rand ->
+                    val (v, rng) = rand(next)
+                    acc.add(v)
+                    next = rng
+                }
+                Pair(acc, next)
+            }
+
+    fun <A> sequence1(fs: List<Rand<A>>): Rand<List<A>> =
+            fs.foldRight(unit(listOf())) { rnd, acc ->
+                map2(rnd, acc) { a, b -> mutableListOf(a).apply { addAll(b) } }
+            }
+
+
 }
 
 val int: Rand<Int> = { it.nextInt() }

@@ -9,8 +9,8 @@ import kotlinx.coroutines.*
 // 설계방법 : 처리하고자 하는 사용 예에서 시작 -> 인터페이스 개발 -> 인터페이스 구현 방법 고민
 
 // 일반적인 sum 연산
-fun sum(ints: Stream<Int>): Int =
-        ints.foldLeft(0) { v1, v2 -> v1 + v2 }
+//fun sum(ints: Stream<Int>): Int =
+//        ints.foldLeft(0) { v1, v2 -> v1 + v2 }
 
 // 분할 정복 알고리즘을 이용한 합산
 // sum(l) 이나 sum(r)같은 하나의 병렬 계산을 나타내는 자료구조는

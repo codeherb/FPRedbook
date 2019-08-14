@@ -3,6 +3,7 @@ package io.funfun.redbook
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
+import kotlin.test.assertNotSame
 import kotlin.test.assertTrue
 
 class Chapter6Test {
@@ -79,4 +80,12 @@ class Chapter6Test {
         assert(p2 != null)
     }
 
+    @Test fun testSequence() {
+        val randList = RandImpl.sequence1(listOf(double, double, double))
+        val (results, rng) = randList(SimpleRng(42))
+        assertEquals(results.size, 3)
+        assertNotSame(results[0], results[1])
+        assertNotSame(results[1], results[2])
+        assertNotSame(results[2], results[0])
+    }
 }
