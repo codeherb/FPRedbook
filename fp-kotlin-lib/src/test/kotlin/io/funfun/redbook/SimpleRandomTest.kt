@@ -6,7 +6,7 @@ import kotlin.test.assertNotEquals
 import kotlin.test.assertNotSame
 import kotlin.test.assertTrue
 
-class Chapter6Test {
+class SimpleRandomTest {
 
     @Test fun testRNG() {
         val rng = SimpleRng(42)
@@ -87,5 +87,21 @@ class Chapter6Test {
         assertNotSame(results[0], results[1])
         assertNotSame(results[1], results[2])
         assertNotSame(results[2], results[0])
+    }
+
+    @Test fun testRollDie() {
+        assertTrue {
+            val v0 = rollDie(SimpleRng(5)).first
+            println("@## v0 = $v0")
+            val v1 = rollDie(SimpleRng(42)).first
+            println("@## v1 = $v1")
+            val v2 = rollDie(SimpleRng(41)).first
+            println("@## v2 = $v2")
+            val v3 = rollDie(SimpleRng(40)).first
+            println("@## v3 = $v3")
+            val v4 = rollDie(SimpleRng(39)).first
+            println("@## v4 = $v4")
+            true
+        }
     }
 }

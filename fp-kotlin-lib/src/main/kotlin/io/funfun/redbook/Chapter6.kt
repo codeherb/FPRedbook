@@ -1,6 +1,7 @@
 package io.funfun.redbook
 
 import io.funfun.redbook.RandImpl.both
+import io.funfun.redbook.RandImpl.nonNegativeLessThan
 
 interface RNG {
     fun nextInt(): Pair<Int, RNG>
@@ -68,17 +69,32 @@ object RandImpl {
 
     fun <A> unit(a: A): Rand<A> = { Pair(a, it) }
 
-    fun <A, B> map(s: Rand<A>, f: (A) -> B): Rand<B> =
+    fun <A, B> _map(s: Rand<A>, f: (A) -> B): Rand<B> =
             { s(it).let { (v, rng) -> Pair(f(v), rng) } }
 
-    fun <A, B, C> map2(ra: Rand<A>, rb: Rand<B>, f: ((A, B) -> C)) : Rand<C> =
+    fun <A, B> map(s: Rand<A>, f: (A) -> B): Rand<B> = { rng ->
+        flatMap(s) {
+            unit(f(it))
+        } (rng)
+    }
+
+    fun <A, B, C> _map2(ra: Rand<A>, rb: Rand<B>, f: ((A, B) -> C)) : Rand<C> =
             { ra(it).let { (a, rng) ->
                 rb(rng).let { (b, rng2) ->
                     Pair(f(a, b), rng2)
                 }
             }}
 
-    fun <T:R , R> flatMap(ra: Rand<T>, f: (v: T) -> Rand<R>) : Rand<R> {
+    fun <A, B, C> map2(ra: Rand<A>, rb: Rand<B>, f: ((A, B) -> C)) : Rand<C> = { rng ->
+        flatMap(ra) { a ->
+            flatMap(rb) { b ->
+                unit(f(a, b))
+            }
+        } (rng)
+    }
+
+
+    fun <T, R> flatMap(ra: Rand<T>, f: (v: T) -> Rand<R>) : Rand<R> {
         return {
             val (v, rng) = ra(it)
             f(v)(rng)
@@ -106,6 +122,21 @@ object RandImpl {
             }
 
 
+    fun nonNegativeLessThan0(n: Int): Rand<Int> = {
+        val (i, rng2) = nonNegativeInt(it)
+        val mod = i % n
+        if (i + (n - 1) - mod >= 0)
+            Pair(mod, rng2)
+        else
+            nonNegativeLessThan0(n)(rng2)
+    }
+
+    fun nonNegativeLessThan(n: Int): Rand<Int> = { rng ->
+        flatMap(::nonNegativeInt) { v ->
+            val mod = v % n
+            if (v + (n - 1) - mod >= 0) unit(mod) else nonNegativeLessThan(n)
+        } (rng)
+    }
 }
 
 val int: Rand<Int> = { it.nextInt() }
@@ -120,3 +151,34 @@ val randIntDouble: Rand<Pair<Int, Double>> =
 
 val randDoubleInt: Rand<Pair<Double, Int>> =
         both(double, int)
+
+val rollDie: Rand<Int> = RandImpl.map(nonNegativeLessThan(6)) { it + 1 }
+
+sealed class Input
+object Coin: Input()
+object Turn: Input()
+
+data class Machine(val locked: Boolean, val candies: Int, val coins: Int)
+
+/**
+ * Vending Machine Role
+ *
+ * 1. Given : 잠겨진 자판기 && 사탕이 있음  When : 동전을 넣으면 then : 잠금이 풀린다.
+ * 2. Given : 잠금이 풀린 자판기 When : 손잡이 돌리면 Then : 사탕이 나오고, 잠긴다.
+ * 3. Given : 잠겨진 자판기 When : 손잡이 돌리면 Then : 아무일 없음
+ * 3-1 Given : 잠금 풀린 자판기 When : 동전을 넣으면 Then : 아무일 없음
+ * 4. Given : 사탕이 없는 자판기 When : 모든 입력 Then : 아무일 없음
+ */
+
+fun simulateMachine(inputs: List<Input>): State<Machine, Pair<Int, Int>> = State {
+    inputs.fold(State.unit<Machine, Pair<Int, Int>>(Pair(0, 0))) { result, event ->
+        State.flatMap(result) { (coin, candy) ->
+            State.map(result) {
+                when(event) {
+                    is Coin -> Pair(coin + 1, candy)
+                    is Turn -> Pair(coin, candy - 1)
+                }
+            }
+        }
+    } (it)
+}
